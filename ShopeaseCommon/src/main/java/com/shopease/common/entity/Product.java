@@ -1,7 +1,10 @@
 package com.shopease.common.entity;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,7 +12,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "products")
@@ -28,7 +33,7 @@ public class Product {
 	@Column(length = 512, nullable = false, name = "short_description")
 	private String shortDescription;
 	
-	@Column(length = 4096, nullable = false, name = "long_description")
+	@Column(length = 4096, nullable = false, name = "full_description")
 	private String fullDescription;
 	
 	@Column(name = "created_time")
@@ -62,10 +67,43 @@ public class Product {
 	@JoinColumn(name = "brand_id")
 	private Brand brand;
 	
+	@Column(name = "main_image", nullable = false)
+	private String mainImage;
 	
+	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+	private Set<ProductImage> images = new HashSet<>();
 
 	public Product() {
 		
+	}
+	
+
+	public Set<ProductImage> getImages() {
+		return images;
+	}
+
+
+
+	public void setImages(Set<ProductImage> images) {
+		this.images = images;
+	}
+	
+	public void addExtraImage(String imageName) {
+		this.images.add(new ProductImage(imageName, this));
+	}
+
+	@Transient
+	public String getMainImagePath() {
+		if (id == null || mainImage == null) return "/images/image-thumbnail.png";
+		return "/product-images/" + this.id + "/" + this.mainImage;
+	}
+
+	public String getMainImage() {
+		return mainImage;
+	}
+
+	public void setMainImage(String mainImage) {
+		this.mainImage = mainImage;
 	}
 
 	public Integer getId() {
@@ -219,7 +257,7 @@ public class Product {
 	}
 	
 	
-	
+
 
 	
 	
